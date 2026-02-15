@@ -15,6 +15,32 @@ public class JsonFileHotelRepository implements HotelRepository {
             Paths.get(System.getProperty("user.dir"), "..", ".local", "hotels.json");
 
     @Override
+    public HotelDTO create(HotelDTO hotel) {
+        try {
+            var hotels = getAll();
+            var id = hotels.size() > 0 ? hotels.get(hotels.size() - 1).getId() + 1 : 1L;
+            var hotelCopy = new HotelDTO(id, hotel.getName());
+            hotels.add(hotelCopy);
+            String jsonContent =
+                    objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(hotels);
+            Files.write(storageFile, jsonContent.getBytes());
+            return hotelCopy;
+        } catch (Exception e) {
+            System.err.println("Error saving hotel: " + e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public void deleteAll() {
+        try {
+            Files.delete(storageFile);
+        } catch (Exception e) {
+            System.err.println("Error deleting all hotels: " + e.getMessage());
+        }
+    }
+
+    @Override
     public List<HotelDTO> getAll() {
         try {
             String jsonContent = new String(Files.readAllBytes(storageFile));
@@ -30,24 +56,20 @@ public class JsonFileHotelRepository implements HotelRepository {
     }
 
     @Override
-    public void create(HotelDTO hotel) {
+    public HotelDTO getById(Long id) {
         try {
-            var hotels = getAll();
-            hotels.add(hotel);
-            String jsonContent =
-                    objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(hotels);
-            Files.write(storageFile, jsonContent.getBytes());
+            String jsonContent = new String(Files.readAllBytes(storageFile));
+            HotelDTO[] hotels = objectMapper.readValue(jsonContent, HotelDTO[].class);
+            if (hotels != null) {
+                for (HotelDTO hotel : hotels) {
+                    if (hotel.getId().equals(id)) {
+                        return hotel;
+                    }
+                }
+            }
         } catch (Exception e) {
-            System.err.println("Error saving hotel: " + e.getMessage());
+            System.err.println("Error retrieving hotel by ID: " + e.getMessage());
         }
-    }
-
-    @Override
-    public void deleteAll() {
-        try {
-            Files.delete(storageFile);
-        } catch (Exception e) {
-            System.err.println("Error deleting all hotels: " + e.getMessage());
-        }
+        return null;
     }
 }

@@ -3,6 +3,7 @@ package propertyview.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -67,6 +68,44 @@ public class HotelsControllerTest {
         var actualHotels = payload.getData();
         assertNotNull(actualHotels);
         assertEquals(expectedHotels.size(), actualHotels.size());
+    }
+
+    @Test
+    void testCanCreateHotel() throws Exception {
+        // arrange
+
+        repo.deleteAll();
+
+        var newHotel = new HotelDTO("Hotel C");
+        var json = objectMapper.writeValueAsString(newHotel);
+
+        // act
+
+        var result =
+                mockMvc.perform(
+                                post("/property-view/hotels")
+                                        .content(json)
+                                        .contentType("application/json"))
+                        .andExpect(status().isCreated())
+                        .andReturn();
+
+        // assert
+
+        var response = result.getResponse();
+        var textContent = response.getContentAsString();
+        var payload =
+                objectMapper.readValue(
+                        textContent, new TypeReference<DataResponseDTO<HotelDTO>>() {});
+        var createdHotel = payload.getData();
+        assertNotNull(createdHotel);
+        assertNotNull(createdHotel.getId());
+        assertEquals(newHotel.getName(), createdHotel.getName());
+
+        var foundHotel = repo.getById(createdHotel.getId());
+        assertNotNull(foundHotel);
+        assertNotNull(foundHotel.getId());
+        assertEquals(createdHotel.getId(), foundHotel.getId());
+        assertEquals(createdHotel.getName(), foundHotel.getName());
     }
 
     private List<HotelDTO> installHotels() {

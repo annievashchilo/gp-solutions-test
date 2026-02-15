@@ -6,7 +6,9 @@ import propertyview.dto.HotelDTO;
 public interface HotelRepository {
     List<HotelDTO> getAll();
 
-    void create(HotelDTO hotel);
+    HotelDTO getById(Long id);
+
+    HotelDTO create(HotelDTO hotel);
 
     void deleteAll();
 }

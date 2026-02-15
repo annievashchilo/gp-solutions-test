@@ -13,6 +13,6 @@ public class Main {
         hotels.forEach(hotel -> repo.create(hotel));
 
         hotels = repo.getAll();
-        hotels.forEach(hotel -> System.out.println(hotel.getName()));
+        hotels.forEach(hotel -> System.out.println(hotel.getId() + ": " + hotel.getName()));
     }
 }
