@@ -15,10 +15,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import propertyview.dto.DataResponseDTO;
 import propertyview.dto.HotelDTO;
+import propertyview.repository.HotelRepository;
+import propertyview.repository.JsonFileHotelRepository;
 
 @SpringBootTest
 public class HotelsControllerTest {
 
+    HotelRepository repo;
     MockMvc mockMvc;
     ObjectMapper objectMapper;
 
@@ -26,6 +29,8 @@ public class HotelsControllerTest {
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(new HotelController()).build();
         this.objectMapper = new ObjectMapper();
+        this.repo = new JsonFileHotelRepository();
+        this.repo.deleteAll();
     }
 
     @Test
@@ -43,5 +48,30 @@ public class HotelsControllerTest {
         var hotels = payload.getData();
         assertNotNull(hotels);
         assertEquals(hotels.size(), 0);
+    }
+
+    @Test
+    void testCanGetAllExistingHotels() throws Exception {
+        var expectedHotels = installHotels();
+
+        var result =
+                mockMvc.perform(get("/property-view/hotels"))
+                        .andExpect(status().isOk())
+                        .andReturn();
+
+        var response = result.getResponse();
+        var textContent = response.getContentAsString();
+        var payload =
+                objectMapper.readValue(
+                        textContent, new TypeReference<DataResponseDTO<List<HotelDTO>>>() {});
+        var actualHotels = payload.getData();
+        assertNotNull(actualHotels);
+        assertEquals(expectedHotels.size(), actualHotels.size());
+    }
+
+    private List<HotelDTO> installHotels() {
+        var hotels = List.of(new HotelDTO("Hotel A"), new HotelDTO("Hotel B"));
+        hotels.forEach(hotel -> repo.create(hotel));
+        return hotels;
     }
 }
