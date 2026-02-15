@@ -1,26 +1,15 @@
 package propertyview.dto;
 
 public class HotelDTO {
+    private String name;
 
-    private String hotelName;
-    private String hotelId;
-    
+    public HotelDTO() {}
 
-    public String getHotelName() {
-        return hotelName;
+    public HotelDTO(String name) {
+        this.name = name;
     }
 
-    public String getHotelId() {
-        return hotelId;
+    public String getName() {
+        return name;
     }
-
-    public void setHotelId(String hotelId) {
-        this.hotelId = hotelId;
-    }
-
-    public void setHotelName(String hotelName) {
-        this.hotelName = hotelName;
-    }
-
-
 }
