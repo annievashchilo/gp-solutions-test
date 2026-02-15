@@ -2,6 +2,7 @@ package propertyview.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -71,6 +72,41 @@ public class HotelsControllerTest {
     }
 
     @Test
+    void testCanGetExistingHotel() throws Exception {
+        var expectedHotels = installHotels();
+        var expectedHotel = expectedHotels.get(0);
+
+        var url = "/property-view/hotels/" + expectedHotel.getId();
+        var result = mockMvc.perform(get(url)).andExpect(status().isOk()).andReturn();
+
+        var response = result.getResponse();
+        var textContent = response.getContentAsString();
+        var payload =
+                objectMapper.readValue(
+                        textContent, new TypeReference<DataResponseDTO<HotelDTO>>() {});
+        var foundHotel = payload.getData();
+        assertNotNull(foundHotel);
+        assertEquals(expectedHotel.getId(), foundHotel.getId());
+        assertEquals(expectedHotel.getName(), foundHotel.getName());
+    }
+
+    @Test
+    void testGetNonExistingHotel() throws Exception {
+        var result =
+                mockMvc.perform(get("/property-view/hotels/123124123"))
+                        .andExpect(status().isNotFound())
+                        .andReturn();
+
+        var response = result.getResponse();
+        var textContent = response.getContentAsString();
+        var payload =
+                objectMapper.readValue(
+                        textContent, new TypeReference<DataResponseDTO<HotelDTO>>() {});
+        var foundHotel = payload.getData();
+        assertNull(foundHotel);
+    }
+
+    @Test
     void testCanCreateHotel() throws Exception {
         // arrange
 
@@ -109,7 +145,7 @@ public class HotelsControllerTest {
     }
 
     private List<HotelDTO> installHotels() {
-        var hotels = List.of(new HotelDTO("Hotel A"), new HotelDTO("Hotel B"));
+        var hotels = List.of(new HotelDTO(1L, "Hotel A"), new HotelDTO(2L, "Hotel B"));
         hotels.forEach(hotel -> repo.create(hotel));
         return hotels;
     }
