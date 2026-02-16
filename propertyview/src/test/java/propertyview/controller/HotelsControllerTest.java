@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,8 +18,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import propertyview.dto.DataResponseDTO;
 import propertyview.dto.HotelDTO;
+import propertyview.repository.H2HotelRepository;
 import propertyview.repository.HotelRepository;
-import propertyview.repository.JsonFileHotelRepository;
+import propertyview.usecase.GetSqlDbConnectionUseCase;
 
 @SpringBootTest
 public class HotelsControllerTest {
@@ -31,8 +33,32 @@ public class HotelsControllerTest {
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(new HotelController()).build();
         this.objectMapper = new ObjectMapper();
-        this.repo = new JsonFileHotelRepository();
+        GetSqlDbConnectionUseCase getSqlDbConnectionUseCase = new GetSqlDbConnectionUseCase();
+        var query =
+                "CREATE TABLE IF NOT EXISTS hotels ("
+                        + "id BIGINT AUTO_INCREMENT PRIMARY KEY,"
+                        + "name VARCHAR NOT NULL,"
+                        + "CONSTRAINT hotel_name UNIQUE (name)"
+                        + ");";
+        try (var conn = getSqlDbConnectionUseCase.execute()) {
+            conn.prepareStatement(query).execute();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        this.repo = new H2HotelRepository();
         this.repo.deleteAll();
+    }
+
+    @AfterAll
+    static void tearDown() {
+        GetSqlDbConnectionUseCase getSqlDbConnectionUseCase = new GetSqlDbConnectionUseCase();
+        var query = "drop table if exists hotels";
+        try (var conn = getSqlDbConnectionUseCase.execute()) {
+            conn.prepareStatement(query).execute();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test

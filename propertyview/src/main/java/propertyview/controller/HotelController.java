@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import propertyview.dto.DataResponseDTO;
 import propertyview.dto.HotelDTO;
+import propertyview.repository.H2HotelRepository;
 import propertyview.repository.HotelRepository;
-import propertyview.repository.JsonFileHotelRepository;
 
 @RestController
 @RequestMapping("/property-view/hotels")
 public class HotelController {
-    private static final HotelRepository repo = new JsonFileHotelRepository();
+    private static final HotelRepository repo = new H2HotelRepository();
 
     @GetMapping
     public DataResponseDTO<List<HotelDTO>> getAllHotels() {
