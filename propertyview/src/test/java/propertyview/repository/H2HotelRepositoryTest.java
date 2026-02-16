@@ -16,6 +16,7 @@ public class H2HotelRepositoryTest {
                 "CREATE TABLE IF NOT EXISTS hotels ("
                         + "id BIGINT AUTO_INCREMENT PRIMARY KEY,"
                         + "name VARCHAR NOT NULL,"
+                        + "city VARCHAR NOT NULL,"
                         + "CONSTRAINT hotel_name UNIQUE (name)"
                         + ");";
         try (var conn = getSqlDbConnectionUseCase.execute()) {
@@ -42,8 +43,8 @@ public class H2HotelRepositoryTest {
 
         var repo = new H2HotelRepository();
         try {
-            repo.create(new HotelDTO("Hotel A"));
-            repo.create(new HotelDTO("Hotel B"));
+            repo.create(new HotelDTO("Hotel A", "Minsk"));
+            repo.create(new HotelDTO("Hotel B", "Paris"));
 
             // ACT
 

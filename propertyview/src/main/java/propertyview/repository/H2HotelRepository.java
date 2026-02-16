@@ -13,22 +13,24 @@ public class H2HotelRepository implements HotelRepository {
     @Override
     public HotelDTO create(HotelDTO hotel) {
         HotelDTO createdHotel = null;
-        var sqlInsert = "INSERT INTO hotels (name) VALUES (?)";
-        var sqlSelect = "SELECT id, name FROM hotels WHERE name = ?";
+        var sqlInsert = "INSERT INTO hotels (name, city) VALUES (?, ?)";
+        var sqlSelect = "SELECT * FROM hotels WHERE name = ?";
         try {
             Connection conn = getSqlDbConnectionUseCase.execute();
             var stmt = conn.prepareStatement(sqlInsert);
             stmt.setString(1, hotel.getName());
+            stmt.setString(2, hotel.getCity());
             stmt.executeUpdate();
 
             var stmtSelect = conn.prepareStatement(sqlSelect);
             stmtSelect.setString(1, hotel.getName());
-            var rows = stmtSelect.executeQuery();
+            var rs = stmtSelect.executeQuery();
 
-            if (rows.next()) {
-                var id = rows.getLong(1);
-                var name = rows.getString(2);
-                createdHotel = new HotelDTO(id, name);
+            if (rs.next()) {
+                var id = rs.getLong("id");
+                var name = rs.getString("name");
+                var city = rs.getString("city");
+                createdHotel = new HotelDTO(id, name, city);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -51,14 +53,15 @@ public class H2HotelRepository implements HotelRepository {
     @Override
     public List<HotelDTO> getAll() {
         List<HotelDTO> hotels = new ArrayList<>();
-        var sql = "SELECT id, name FROM hotels";
+        var sql = "SELECT * FROM hotels";
         try {
             Connection conn = getSqlDbConnectionUseCase.execute();
             var stmt = conn.prepareStatement(sql);
             var rs = stmt.executeQuery();
             while (rs.next()) {
 
-                var hotel = new HotelDTO(rs.getLong("id"), rs.getString("name"));
+                var hotel =
+                        new HotelDTO(rs.getLong("id"), rs.getString("name"), rs.getString("city"));
                 hotels.add(hotel);
             }
         } catch (Exception e) {
@@ -71,14 +74,14 @@ public class H2HotelRepository implements HotelRepository {
     @Override
     public HotelDTO getById(Long id) {
         HotelDTO hotel = null;
-        var sql = "SELECT id, name FROM hotels WHERE id = ?";
+        var sql = "SELECT * FROM hotels WHERE id = ?";
         try {
             Connection conn = getSqlDbConnectionUseCase.execute();
             var stmt = conn.prepareStatement(sql);
             stmt.setLong(1, id);
             var rs = stmt.executeQuery();
             if (rs.next()) {
-                hotel = new HotelDTO(rs.getLong("id"), rs.getString("name"));
+                hotel = new HotelDTO(rs.getLong("id"), rs.getString("name"), rs.getString("city"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -88,14 +91,14 @@ public class H2HotelRepository implements HotelRepository {
 
     public HotelDTO getByName(String name) {
         HotelDTO hotel = null;
-        var sql = "SELECT id, name FROM hotels WHERE name = ?";
+        var sql = "SELECT * FROM hotels WHERE name = ?";
         try {
             Connection conn = getSqlDbConnectionUseCase.execute();
             var stmt = conn.prepareStatement(sql);
             stmt.setString(1, name);
             var rs = stmt.executeQuery();
             if (rs.next()) {
-                hotel = new HotelDTO(rs.getLong("id"), rs.getString("name"));
+                hotel = new HotelDTO(rs.getLong("id"), rs.getString("name"), rs.getString("city"));
             }
         } catch (Exception e) {
             e.printStackTrace();

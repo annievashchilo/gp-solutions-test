@@ -38,6 +38,7 @@ public class HotelsControllerTest {
                 "CREATE TABLE IF NOT EXISTS hotels ("
                         + "id BIGINT AUTO_INCREMENT PRIMARY KEY,"
                         + "name VARCHAR NOT NULL,"
+                        + "city VARCHAR NOT NULL,"
                         + "CONSTRAINT hotel_name UNIQUE (name)"
                         + ");";
         try (var conn = getSqlDbConnectionUseCase.execute()) {
@@ -138,7 +139,7 @@ public class HotelsControllerTest {
 
         repo.deleteAll();
 
-        var newHotel = new HotelDTO("Hotel C");
+        var newHotel = new HotelDTO("Hotel C", "Minsk");
         var json = objectMapper.writeValueAsString(newHotel);
 
         // act
@@ -171,8 +172,12 @@ public class HotelsControllerTest {
     }
 
     private List<HotelDTO> installHotels() {
-        var hotels = List.of(new HotelDTO(1L, "Hotel A"), new HotelDTO(2L, "Hotel B"));
-        hotels.forEach(hotel -> repo.create(hotel));
+        var hotels = List.of(new HotelDTO("Hotel A", "Minsk"), new HotelDTO("Hotel B", "Paris"));
+        hotels.forEach(
+                preparedHotel -> {
+                    var createdHotel = repo.create(preparedHotel);
+                    preparedHotel.setId(createdHotel.getId());
+                });
         return hotels;
     }
 }
