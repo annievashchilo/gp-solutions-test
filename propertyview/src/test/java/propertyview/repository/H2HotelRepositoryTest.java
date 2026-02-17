@@ -2,6 +2,7 @@ package propertyview.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ public class H2HotelRepositoryTest {
                         + "id BIGINT AUTO_INCREMENT PRIMARY KEY,"
                         + "name VARCHAR NOT NULL,"
                         + "city VARCHAR NOT NULL,"
+                        + "amenities VARCHAR NOT NULL,"
                         + "CONSTRAINT hotel_name UNIQUE (name)"
                         + ");";
         try (var conn = getSqlDbConnectionUseCase.execute()) {
@@ -43,8 +45,8 @@ public class H2HotelRepositoryTest {
 
         var repo = new H2HotelRepository();
         try {
-            repo.create(new HotelDTO("Hotel A", "Minsk"));
-            repo.create(new HotelDTO("Hotel B", "Paris"));
+            repo.create(new HotelDTO("Hotel A", "Minsk", List.of("Free WiFi", "Room Service")));
+            repo.create(new HotelDTO("Hotel B", "Paris", List.of("Free Parking", "Concierge")));
 
             // ACT
 

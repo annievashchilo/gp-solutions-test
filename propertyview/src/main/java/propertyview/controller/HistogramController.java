@@ -19,13 +19,32 @@ public class HistogramController {
     public DataResponseDTO<Map<String, Long>> getHotelNameHistogram(@PathVariable String param) {
         var histogram = new HashMap<String, Long>();
 
-        hotelRepo
-                .getAll()
-                .forEach(
-                        hotel -> {
-                            var city = hotel.getCity();
-                            histogram.put(city, histogram.getOrDefault(city, 0L) + 1);
-                        });
+        switch (param) {
+            case "city":
+                hotelRepo
+                        .getAll()
+                        .forEach(
+                                hotel -> {
+                                    var city = hotel.getCity();
+                                    histogram.put(city, histogram.getOrDefault(city, 0L) + 1);
+                                });
+                break;
+            case "amenities":
+                hotelRepo
+                        .getAll()
+                        .forEach(
+                                hotel -> {
+                                    hotel.getAmenities()
+                                            .forEach(
+                                                    amenity ->
+                                                            histogram.put(
+                                                                    amenity,
+                                                                    histogram.getOrDefault(
+                                                                                    amenity, 0L)
+                                                                            + 1));
+                                });
+                break;
+        }
 
         return new DataResponseDTO<Map<String, Long>>(histogram);
     }

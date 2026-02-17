@@ -38,6 +38,7 @@ public class HistogramControllerTest {
                         + "id BIGINT AUTO_INCREMENT PRIMARY KEY,"
                         + "name VARCHAR NOT NULL,"
                         + "city VARCHAR NOT NULL,"
+                        + "amenities VARCHAR NOT NULL,"
                         + "CONSTRAINT hotel_name UNIQUE (name)"
                         + ");";
         try (var conn = getSqlDbConnectionUseCase.execute()) {
@@ -59,6 +60,34 @@ public class HistogramControllerTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    void testGroupHotelsByAmenities() throws Exception {
+        // ARRANGE
+
+        installHotels();
+
+        // ACT
+
+        var result =
+                mockMvc.perform(get("/property-view/histogram/amenities"))
+                        .andExpect(status().isOk())
+                        .andReturn();
+
+        // ASSERT
+
+        var response = result.getResponse();
+        var textContent = response.getContentAsString();
+
+        var payload =
+                objectMapper.readValue(
+                        textContent, new TypeReference<DataResponseDTO<Map<String, Long>>>() {});
+        var amenities = payload.getData();
+        assertNotNull(amenities);
+        assertEquals(6, amenities.size());
+        assertEquals(1, amenities.get("No Smoking"));
+        assertEquals(2, amenities.get("Free WiFi"));
     }
 
     @Test
@@ -90,10 +119,12 @@ public class HistogramControllerTest {
     }
 
     private List<HotelDTO> installHotels() {
-        var hotelA = new HotelDTO("Hotel A", "Minsk");
-        var hotelB = new HotelDTO("Hotel B", "Moskow");
-        var hotelC = new HotelDTO("Hotel C", "Moskow");
-        var hotelD = new HotelDTO("Hotel D", "Mogilev");
+        var hotelA = new HotelDTO("Hotel A", "Minsk", List.of("No Smoking", "Free WiFi"));
+        var hotelB = new HotelDTO("Hotel B", "Moskow", List.of("Free Parking", "Meeting Rooms"));
+        var hotelC =
+                new HotelDTO(
+                        "Hotel C", "Moskow", List.of("Free Parking", "Room Service", "Concierge"));
+        var hotelD = new HotelDTO("Hotel D", "Mogilev", List.of("Free WiFi"));
 
         var hotels = List.of(hotelA, hotelB, hotelC, hotelD);
         hotels.forEach(

@@ -39,6 +39,7 @@ public class HotelsControllerTest {
                         + "id BIGINT AUTO_INCREMENT PRIMARY KEY,"
                         + "name VARCHAR NOT NULL,"
                         + "city VARCHAR NOT NULL,"
+                        + "amenities VARCHAR NOT NULL,"
                         + "CONSTRAINT hotel_name UNIQUE (name)"
                         + ");";
         try (var conn = getSqlDbConnectionUseCase.execute()) {
@@ -134,12 +135,38 @@ public class HotelsControllerTest {
     }
 
     @Test
+    void testUpdateAmenitiesForExistingHotel() throws Exception {
+        var expectedHotels = installHotels();
+        var expectedHotel = expectedHotels.get(0);
+
+        var url = "/property-view/hotels/" + expectedHotel.getId() + "/amenities";
+        var expectedAmenities = List.of("Free WiFi", "Room Service", "Yes Smoking");
+        var json = objectMapper.writeValueAsString(expectedAmenities);
+        var result =
+                mockMvc.perform(post(url).content(json).contentType("application/json"))
+                        .andExpect(status().isOk())
+                        .andReturn();
+
+        url = "/property-view/hotels/" + expectedHotel.getId();
+        result = mockMvc.perform(get(url)).andExpect(status().isOk()).andReturn();
+
+        var response = result.getResponse();
+        json = response.getContentAsString();
+        var payload =
+                objectMapper.readValue(json, new TypeReference<DataResponseDTO<HotelDTO>>() {});
+        var updatedHotel = payload.getData();
+        assertNotNull(updatedHotel);
+        assertEquals(expectedHotel.getId(), updatedHotel.getId());
+        assertEquals(expectedAmenities, updatedHotel.getAmenities());
+    }
+
+    @Test
     void testCanCreateHotel() throws Exception {
         // arrange
 
         repo.deleteAll();
 
-        var newHotel = new HotelDTO("Hotel C", "Minsk");
+        var newHotel = new HotelDTO("Hotel C", "Minsk", List.of("Free WiFi", "Room Service"));
         var json = objectMapper.writeValueAsString(newHotel);
 
         // act
@@ -169,15 +196,21 @@ public class HotelsControllerTest {
         assertNotNull(foundHotel.getId());
         assertEquals(createdHotel.getId(), foundHotel.getId());
         assertEquals(createdHotel.getName(), foundHotel.getName());
+
+        assertEquals(createdHotel.getAmenities(), foundHotel.getAmenities());
     }
 
     private List<HotelDTO> installHotels() {
-        var hotels = List.of(new HotelDTO("Hotel A", "Minsk"), new HotelDTO("Hotel B", "Paris"));
+        var hotels =
+                List.of(
+                        new HotelDTO("Hotel A", "Minsk", List.of("Free WiFi")),
+                        new HotelDTO("Hotel B", "Paris", List.of("Free Parking", "Concierge")));
         hotels.forEach(
                 preparedHotel -> {
                     var createdHotel = repo.create(preparedHotel);
                     preparedHotel.setId(createdHotel.getId());
                 });
+
         return hotels;
     }
 }

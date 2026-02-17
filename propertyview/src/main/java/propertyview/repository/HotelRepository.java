@@ -10,5 +10,7 @@ public interface HotelRepository {
 
     HotelDTO create(HotelDTO hotel);
 
+    HotelDTO update(HotelDTO hotel);
+
     void deleteAll();
 }

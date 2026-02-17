@@ -44,4 +44,19 @@ public class HotelController {
         var createdHotel = repo.create(hotel);
         return new DataResponseDTO<HotelDTO>(createdHotel);
     }
+
+    @PostMapping("/{id}/amenities")
+    @ResponseBody
+    public DataResponseDTO<HotelDTO> updateHotelAmenities(
+            @PathVariable Long id, @RequestBody List<String> newAmenities) {
+        var hotel = repo.getById(id);
+
+        if (hotel == null) {
+            return null;
+        }
+
+        hotel.setAmenities(newAmenities);
+        var updatedHotel = repo.update(hotel);
+        return new DataResponseDTO<HotelDTO>(updatedHotel);
+    }
 }
