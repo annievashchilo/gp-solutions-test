@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import propertyview.dto.HotelDTO;
 import propertyview.usecase.GetSqlDbConnectionUseCase;
 
@@ -70,11 +71,36 @@ public class H2HotelRepository implements HotelRepository {
 
     @Override
     public List<HotelDTO> getAll() {
+        return getAll(null);
+    }
+
+    @Override
+    public List<HotelDTO> getAll(Map<String, String> filterBy) {
         List<HotelDTO> hotels = new ArrayList<>();
-        var sql = "SELECT * FROM hotels";
+        var sqlBuilder = new StringBuilder("SELECT * FROM hotels");
+
+        var sqlParams = new ArrayList<String>();
+        if (filterBy != null && filterBy.size() > 0) {
+            sqlBuilder.append(" WHERE ");
+            int i = 0;
+            for (var entry : filterBy.entrySet()) {
+                sqlBuilder.append(entry.getKey() + " ILIKE ? ");
+                if (i > 0) {
+                    sqlBuilder.append(" AND ");
+                }
+                sqlParams.add(entry.getValue());
+            }
+        }
+
+        var sql = sqlBuilder.toString();
+
         try {
             Connection conn = getSqlDbConnectionUseCase.execute();
             var stmt = conn.prepareStatement(sql);
+            for (int i = 0; i < sqlParams.size(); i++) {
+                var param = sqlParams.get(i);
+                stmt.setString(i + 1, param);
+            }
             var rs = stmt.executeQuery();
             while (rs.next()) {
                 var hotel = mapResultSetToHotelDTO(rs);
@@ -136,6 +162,11 @@ public class H2HotelRepository implements HotelRepository {
         } catch (JsonProcessingException e) {
         }
         return new HotelDTO(
-                rs.getLong("id"), rs.getString("name"), rs.getString("city"), amenities);
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getString("brand"),
+                rs.getString("city"),
+                rs.getString("country"),
+                amenities);
     }
 }
