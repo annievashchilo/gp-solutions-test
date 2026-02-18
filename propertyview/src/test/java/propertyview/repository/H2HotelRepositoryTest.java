@@ -3,41 +3,11 @@ package propertyview.repository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import propertyview.controller.BaseControllerTest;
 import propertyview.dto.HotelDTO;
-import propertyview.usecase.GetSqlDbConnectionUseCase;
 
-public class H2HotelRepositoryTest {
-    @BeforeEach
-    void setup() {
-        GetSqlDbConnectionUseCase getSqlDbConnectionUseCase = new GetSqlDbConnectionUseCase();
-        var query =
-                "CREATE TABLE IF NOT EXISTS hotels ("
-                        + "id BIGINT AUTO_INCREMENT PRIMARY KEY,"
-                        + "name VARCHAR NOT NULL,"
-                        + "city VARCHAR NOT NULL,"
-                        + "amenities VARCHAR NOT NULL,"
-                        + "CONSTRAINT hotel_name UNIQUE (name)"
-                        + ");";
-        try (var conn = getSqlDbConnectionUseCase.execute()) {
-            conn.prepareStatement(query).execute();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @AfterAll
-    static void tearDown() {
-        GetSqlDbConnectionUseCase getSqlDbConnectionUseCase = new GetSqlDbConnectionUseCase();
-        var query = "drop table if exists hotels";
-        try (var conn = getSqlDbConnectionUseCase.execute()) {
-            conn.prepareStatement(query).execute();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+public class H2HotelRepositoryTest extends BaseControllerTest {
 
     @Test
     void testCanGetAllHotelsFromDb() throws Exception {
@@ -45,8 +15,22 @@ public class H2HotelRepositoryTest {
 
         var repo = new H2HotelRepository();
         try {
-            repo.create(new HotelDTO("Hotel A", "Minsk", List.of("Free WiFi", "Room Service")));
-            repo.create(new HotelDTO("Hotel B", "Paris", List.of("Free Parking", "Concierge")));
+            var hotelA =
+                    new HotelDTO(
+                            "Hotel A",
+                            "Ania",
+                            "Minsk",
+                            "Belarus",
+                            List.of("No Smoking", "Free WiFi"));
+            var hotelB =
+                    new HotelDTO(
+                            "Hotel B",
+                            "Boris",
+                            "Moskow",
+                            "Russia",
+                            List.of("Free Parking", "Meeting Rooms"));
+            repo.create(hotelA);
+            repo.create(hotelB);
 
             // ACT
 
