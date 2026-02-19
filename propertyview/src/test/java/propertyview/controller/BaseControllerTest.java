@@ -10,6 +10,7 @@ import propertyview.dto.HotelDTO;
 import propertyview.repository.H2HotelRepository;
 import propertyview.repository.HotelRepository;
 import propertyview.usecase.GetSqlDbConnectionUseCase;
+import propertyview.usecase.InitDbUseCase;
 
 public class BaseControllerTest {
 
@@ -27,18 +28,10 @@ public class BaseControllerTest {
 
         this.objectMapper = new ObjectMapper();
         GetSqlDbConnectionUseCase getSqlDbConnectionUseCase = new GetSqlDbConnectionUseCase();
-        var query =
-                "CREATE TABLE IF NOT EXISTS hotels ("
-                        + "id BIGINT AUTO_INCREMENT PRIMARY KEY,"
-                        + "name VARCHAR NOT NULL,"
-                        + "brand VARCHAR NOT NULL,"
-                        + "city VARCHAR NOT NULL,"
-                        + "country VARCHAR NOT NULL,"
-                        + "amenities VARCHAR NOT NULL,"
-                        + "CONSTRAINT hotel_name UNIQUE (name)"
-                        + ");";
+
         try (var conn = getSqlDbConnectionUseCase.execute()) {
-            conn.prepareStatement(query).execute();
+            var initDb = new InitDbUseCase(conn);
+            initDb.execute();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
