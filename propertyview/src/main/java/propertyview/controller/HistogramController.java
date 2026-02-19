@@ -8,20 +8,20 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import propertyview.dto.DataResponseDTO;
 import propertyview.dto.HotelDTO;
-import propertyview.repository.H2HotelRepository;
 import propertyview.repository.HotelRepository;
 
-@Tag(name = "Histogram Controller", description = "APIs for histogram")
+@Tag(name = "Histograms", description = "APIs for histogram")
 @RestController
 @RequestMapping("/property-view/histogram")
 public class HistogramController {
-    private static final HotelRepository hotelRepo = new H2HotelRepository();
+    @Autowired private HotelRepository hotelRepo;
 
     @Operation(summary = "Group hotels", description = "Group hotels by specific parameter")
     @ApiResponses(

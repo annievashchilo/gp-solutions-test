@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,14 +20,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import propertyview.dto.DataResponseDTO;
 import propertyview.dto.HotelDTO;
-import propertyview.repository.H2HotelRepository;
 import propertyview.repository.HotelRepository;
 
 @RestController
 @RequestMapping("/property-view/hotels")
-@Tag(name = "Hotel Controller", description = "APIs for managing hotels")
+@Tag(name = "Hotels", description = "APIs for managing hotels")
 public class HotelController {
-    private static final HotelRepository repo = new H2HotelRepository();
+    @Autowired private HotelRepository hotelRepo;
 
     @Operation(summary = "Get all hotels", description = "Get all existing hotels from the system")
     @ApiResponses(
@@ -42,7 +42,7 @@ public class HotelController {
             })
     @GetMapping
     public DataResponseDTO<List<HotelDTO>> getAllHotels() {
-        var hotels = repo.getAll();
+        var hotels = hotelRepo.getAll();
         return new DataResponseDTO<List<HotelDTO>>(hotels);
     }
 
@@ -61,7 +61,7 @@ public class HotelController {
     @GetMapping("/{id}")
     @ResponseBody
     public ResponseEntity<DataResponseDTO<HotelDTO>> getHotelById(@PathVariable Long id) {
-        var hotel = repo.getById(id);
+        var hotel = hotelRepo.getById(id);
         if (hotel == null) {
             var noHotel = new DataResponseDTO<HotelDTO>(null);
             return new ResponseEntity<>(noHotel, HttpStatus.NOT_FOUND);
@@ -84,7 +84,7 @@ public class HotelController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public DataResponseDTO<HotelDTO> createHotel(@RequestBody HotelDTO hotel) {
-        var createdHotel = repo.create(hotel);
+        var createdHotel = hotelRepo.create(hotel);
         return new DataResponseDTO<HotelDTO>(createdHotel);
     }
 
@@ -106,14 +106,14 @@ public class HotelController {
     @ResponseBody
     public DataResponseDTO<HotelDTO> updateHotelAmenities(
             @PathVariable Long id, @RequestBody List<String> newAmenities) {
-        var hotel = repo.getById(id);
+        var hotel = hotelRepo.getById(id);
 
         if (hotel == null) {
             return null;
         }
 
         hotel.setAmenities(newAmenities);
-        var updatedHotel = repo.update(hotel);
+        var updatedHotel = hotelRepo.update(hotel);
         return new DataResponseDTO<HotelDTO>(updatedHotel);
     }
 }

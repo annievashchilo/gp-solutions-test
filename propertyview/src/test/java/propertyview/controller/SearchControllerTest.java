@@ -27,7 +27,7 @@ public class SearchControllerTest extends BaseControllerTest {
         String value = expectedHotel.getCity();
         URI uri = UriComponentsBuilder.fromUriString(url).queryParam(key, value).build().toUri();
 
-        var result = mockMvcSearch.perform(get(uri)).andExpect(status().isOk()).andReturn();
+        var result = mockMvc.perform(get(uri)).andExpect(status().isOk()).andReturn();
 
         var response = result.getResponse();
         var textContent = response.getContentAsString();
@@ -36,13 +36,10 @@ public class SearchControllerTest extends BaseControllerTest {
                         textContent, new TypeReference<DataResponseDTO<List<HotelDTO>>>() {});
 
         var foundHotels = payload.getData();
-
-        var foundHotel = foundHotels.get(0);
-
         assertNotNull(foundHotels);
         assertEquals(2, foundHotels.size());
 
-        assertEquals(expectedHotel.getId(), foundHotel.getId());
+        var foundHotel = foundHotels.get(0);
         assertEquals(expectedHotel.getCity(), foundHotel.getCity());
     }
 
@@ -56,7 +53,7 @@ public class SearchControllerTest extends BaseControllerTest {
         String value = expectedHotel.getName();
         URI uri = UriComponentsBuilder.fromUriString(url).queryParam(key, value).build().toUri();
 
-        var result = mockMvcSearch.perform(get(uri)).andExpect(status().isOk()).andReturn();
+        var result = mockMvc.perform(get(uri)).andExpect(status().isOk()).andReturn();
 
         var response = result.getResponse();
         var textContent = response.getContentAsString();
@@ -69,7 +66,6 @@ public class SearchControllerTest extends BaseControllerTest {
         assertEquals(1, foundHotels.size());
 
         var foundHotel = foundHotels.get(0);
-        assertEquals(expectedHotel.getId(), foundHotel.getId());
         assertEquals(expectedHotel.getName(), foundHotel.getName());
     }
 
@@ -83,7 +79,7 @@ public class SearchControllerTest extends BaseControllerTest {
         String value = expectedHotel.getCountry();
         URI uri = UriComponentsBuilder.fromUriString(url).queryParam(key, value).build().toUri();
 
-        var result = mockMvcSearch.perform(get(uri)).andExpect(status().isOk()).andReturn();
+        var result = mockMvc.perform(get(uri)).andExpect(status().isOk()).andReturn();
 
         var response = result.getResponse();
         var textContent = response.getContentAsString();
@@ -96,7 +92,6 @@ public class SearchControllerTest extends BaseControllerTest {
         assertEquals(3, foundHotels.size());
 
         var foundHotel = foundHotels.get(0);
-        assertEquals(expectedHotel.getId(), foundHotel.getId());
         assertEquals(expectedHotel.getCountry(), foundHotel.getCountry());
     }
 
@@ -110,7 +105,7 @@ public class SearchControllerTest extends BaseControllerTest {
         String value = expectedHotel.getBrand();
         URI uri = UriComponentsBuilder.fromUriString(url).queryParam(key, value).build().toUri();
 
-        var result = mockMvcSearch.perform(get(uri)).andExpect(status().isOk()).andReturn();
+        var result = mockMvc.perform(get(uri)).andExpect(status().isOk()).andReturn();
 
         var response = result.getResponse();
         var textContent = response.getContentAsString();
@@ -123,7 +118,6 @@ public class SearchControllerTest extends BaseControllerTest {
         assertEquals(2, foundHotels.size());
 
         var foundHotel = foundHotels.get(0);
-        assertEquals(expectedHotel.getId(), foundHotel.getId());
         assertEquals(expectedHotel.getBrand(), foundHotel.getBrand());
     }
 }

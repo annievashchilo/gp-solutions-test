@@ -9,7 +9,6 @@ import propertyview.dto.HealthcheckDTO;
 @RestController
 @RequestMapping("/healthcheck")
 public class HealthcheckController {
-
     @GetMapping
     public DataResponseDTO<HealthcheckDTO> handle() {
         return new DataResponseDTO<HealthcheckDTO>(new HealthcheckDTO("ok"));

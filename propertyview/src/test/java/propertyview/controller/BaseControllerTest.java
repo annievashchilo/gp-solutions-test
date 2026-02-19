@@ -2,53 +2,44 @@ package propertyview.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 import propertyview.dto.HotelDTO;
-import propertyview.repository.H2HotelRepository;
 import propertyview.repository.HotelRepository;
-import propertyview.usecase.GetSqlDbConnectionUseCase;
-import propertyview.usecase.InitDbUseCase;
 
+@ExtendWith(SpringExtension.class)
+@WebAppConfiguration("src/main/java")
+@ContextConfiguration
 public class BaseControllerTest {
-
-    protected HotelRepository repo;
+    protected static final ObjectMapper objectMapper = new ObjectMapper();
     protected MockMvc mockMvc;
-    protected MockMvc mockMvcHistogram;
-    protected MockMvc mockMvcSearch;
-    protected ObjectMapper objectMapper;
+
+    @Autowired protected HotelRepository hotelRepo;
 
     @BeforeEach
-    void setup() {
-        this.mockMvc = MockMvcBuilders.standaloneSetup(new HotelController()).build();
-        this.mockMvcHistogram = MockMvcBuilders.standaloneSetup(new HistogramController()).build();
-        this.mockMvcSearch = MockMvcBuilders.standaloneSetup(new SearchController()).build();
-
-        this.objectMapper = new ObjectMapper();
-        GetSqlDbConnectionUseCase getSqlDbConnectionUseCase = new GetSqlDbConnectionUseCase();
-
-        try (var conn = getSqlDbConnectionUseCase.execute()) {
-            var initDb = new InitDbUseCase(conn);
-            initDb.execute();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        this.repo = new H2HotelRepository();
-        this.repo.deleteAll();
+    void setUp(WebApplicationContext context) {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
 
-    @AfterAll
-    static void tearDown() {
-        GetSqlDbConnectionUseCase getSqlDbConnectionUseCase = new GetSqlDbConnectionUseCase();
-        var query = "drop table if exists hotels";
-        try (var conn = getSqlDbConnectionUseCase.execute()) {
-            conn.prepareStatement(query).execute();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    @AfterEach
+    void tearDown(TestInfo testInfo) {
+        String testName = testInfo.getDisplayName();
+
+        var leftOvers = hotelRepo.getAll();
+        if (leftOvers.size() > 0) {
+            System.err.println("WARNING: Hotels left after test: " + testName);
         }
+
+        hotelRepo.deleteAll();
     }
 
     protected List<HotelDTO> installHotels() {
@@ -82,7 +73,7 @@ public class BaseControllerTest {
         var hotels = List.of(hotelA, hotelB, hotelC, hotelD, hotelE);
         hotels.forEach(
                 preparedHotel -> {
-                    var createdHotel = repo.create(preparedHotel);
+                    var createdHotel = hotelRepo.create(preparedHotel);
                     preparedHotel.setId(createdHotel.getId());
                 });
         return hotels;

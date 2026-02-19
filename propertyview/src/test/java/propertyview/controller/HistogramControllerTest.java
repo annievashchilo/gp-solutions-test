@@ -19,8 +19,7 @@ public class HistogramControllerTest extends BaseControllerTest {
         installHotels();
 
         var result =
-                mockMvcHistogram
-                        .perform(get("/property-view/histogram/amenities"))
+                mockMvc.perform(get("/property-view/histogram/amenities"))
                         .andExpect(status().isOk())
                         .andReturn();
 
@@ -39,12 +38,10 @@ public class HistogramControllerTest extends BaseControllerTest {
 
     @Test
     void testGroupByCity() throws Exception {
-
         installHotels();
 
         var result =
-                mockMvcHistogram
-                        .perform(get("/property-view/histogram/city"))
+                mockMvc.perform(get("/property-view/histogram/city"))
                         .andExpect(status().isOk())
                         .andReturn();
 

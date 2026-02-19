@@ -1,5 +1,8 @@
 package propertyview.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,5 +35,15 @@ public class HotelDTO {
     public String toString() {
         return "HotelDTO{id=%d, name='%s', brand = %s, city='%s', country='%s', amenities=%s}"
                 .formatted(id, name, brand, city, country, amenities);
+    }
+
+    @JsonIgnore
+    public String getAmenitiesAsJson() {
+        var amenities = "[]";
+        try {
+            amenities = new ObjectMapper().writeValueAsString(getAmenities());
+        } catch (JsonProcessingException e) {
+        }
+        return amenities;
     }
 }

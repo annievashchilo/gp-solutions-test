@@ -116,8 +116,7 @@ public class HotelsControllerTest extends BaseControllerTest {
 
     @Test
     void testCanCreateHotel() throws Exception {
-
-        repo.deleteAll();
+        hotelRepo.deleteAll();
 
         var newHotel =
                 new HotelDTO(
@@ -142,12 +141,11 @@ public class HotelsControllerTest extends BaseControllerTest {
         assertNotNull(createdHotel.getId());
         assertEquals(newHotel.getName(), createdHotel.getName());
 
-        var foundHotel = repo.getById(createdHotel.getId());
+        var foundHotel = hotelRepo.getById(createdHotel.getId());
         assertNotNull(foundHotel);
         assertNotNull(foundHotel.getId());
         assertEquals(createdHotel.getId(), foundHotel.getId());
         assertEquals(createdHotel.getName(), foundHotel.getName());
-
         assertEquals(createdHotel.getAmenities(), foundHotel.getAmenities());
     }
 }
