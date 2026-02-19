@@ -16,3 +16,6 @@ clean:
 
 test:
 	cd $(WORKING_DIR) && mvn test
+
+run:
+	cd $(WORKING_DIR) && mvn spring-boot:run
